@@ -10,7 +10,7 @@ df = pd.read_excel('data.xls')
 text_search = st.text_input("Search Chassis Number", value="")
 
 #search the chassis number in the dataframe
-result = df[df['ITEM DESCRIPTION'].str.contains(text_search)]
+result = df[df['ITEM DESCRIPTION'].str.contains(text_search, case=False)]
 
 #display the result
 st.write(result)
