@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import pip
 
+pip.main(['install', 'openpyxl']) 
 st.title('DataFrame')
 
 #read the excel file named data.xls
