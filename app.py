@@ -1,21 +1,39 @@
 import streamlit as st
-import pandas as pd
-import pip
+import psycopg2
+from conf import config
 
-pip.main(['install', 'openpyxl']) 
-st.title('DataFrame')
+def connect():
+    try:
+        connection = None
+        params = config()
+        print("connecting to postgreSQL database  . . .")
+        connection = psycopg2.connect(**params)
 
-#read the excel file named data.xls
-df = pd.read_excel('data.xls')
+        crsr = connection.cursor()
+        print("PostgreSQL database version: ")
 
-#take input from user
-text_search = st.text_input("Search Chassis Number", value="")
+        query = f"select * from public.\"Custom\" WHERE \"ITEM DESCRIPTION\" LIKE '%{text_search}%';"
+        crsr.execute(query)
+        result = crsr.fetchall()
+        column_names = ["CLT CODE", "TYPE", "IGM NO", "INDEX NO", "IGM DATE", "BL NO", "BL DATE", "CONSIGNEE NAME", "GD NO", "GD DATE", "CASH NO", "CASH DATE", "NTN", "IMPORTER NAME", "PCT CODE", "ITEM DESCRIPTION", "SRO", "IMPORT VALUE Rs", "C.DUTY", "S.TAX", "A.S.TAX", "AIT", "REG DUTY", "FED", "CED"]
 
-#search the chassis number in the dataframe
-result = df[df['ITEM DESCRIPTION'].str.contains(text_search, case=False)]
+        formatted_data = [column_names] + list(result)
+        formatted_data = list(map(list, zip(*formatted_data))) 
+        st.table(formatted_data)
+        crsr.close()
+    
+    except(Exception,psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if connection is not None:
+            connection.close()       
+            print('Connection Terminated')
 
-#display the result
-st.write(result)
+
+if __name__ == "__main__":
+    st.title('DataFrame')
+    text_search = st.text_input("Search Chassis Number", value="")
+    connect() 
 
 
 
